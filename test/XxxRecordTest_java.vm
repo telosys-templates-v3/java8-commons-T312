@@ -1,0 +1,52 @@
+#parse("/include/java_header.vm")
+$env.setEntityClassNameSuffix("Record")
+package ${target.javaPackageFromFolder(${TEST_SRC})};
+
+## Same package => no need to import 'Record' class //import $entity.name ;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+/**
+ * JUnit test case for bean $entity.name
+ * 
+ * @author Telosys Tools Generator
+ *
+ */
+#set ( $beanVar = ${fn.uncapitalize($entity.name)} )
+public class ${entity.name}Test 
+{
+
+	@Test
+	public void testSettersAndGetters() {
+		
+		System.out.println("Checking class ${entity.name} getters and setters ..." );
+		
+		${entity.name} ${beanVar} = new ${entity.name}();
+
+#set( $values = $fn.buildValues($entity.attributes, 1) )
+
+#foreach( $attribute in $entity.attributes )
+#set( $value = $values.getValue($attribute.name) )
+		//--- Test setter/getter for attribute "$attribute.name"  ( model type : $attribute.type / wrapperType : $attribute.wrapperType )
+		${beanVar}.${attribute.setter}( $value ) ;
+## #if ( $attribute.isPrimitiveType() )
+##		Assert.assertEquals( $value, ${beanVar}.${attribute.getter}() ) ;
+## #else
+#if ( $value == "null" )
+		Assert.assertNull(${beanVar}.${attribute.getter}());
+#else
+##		Assert.assertTrue($values.comparisonStatement(${beanVar}, $attribute ));
+#if ( $attribute.isPrimitiveType() ) 
+		Assert.assertTrue(  $value == ${beanVar}.${attribute.getter}()  ) ; // Primitive type in model
+#else
+		Assert.assertEquals( $value, ${beanVar}.${attribute.getter}() ) ; // Not primitive type in model
+#end
+#end
+
+## #end
+
+#end
+	}
+
+}

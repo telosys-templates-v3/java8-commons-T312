@@ -1,0 +1,36 @@
+#parse("/include/init_var_entity.vm")
+#parse("/include/java_header.vm")
+package ${target.javaPackageFromFolder($SRC)};
+
+import ${recordPackage}.${recordClass};
+import ${ROOT_PKG}.commons.ListItem;
+
+public class ${entity.name}ListItem implements ListItem {
+
+	private final String value ;
+	private final String label ;
+	
+	public ${entity.name}ListItem($recordClass $recordInstance) {
+		super();
+
+		this.value = ""
+#foreach( $attribute in $entity.keyAttributes )
+			#if( $foreach.count > 1 ) + "|" #end + ${recordInstance}.${attribute.getter}()
+#end
+		;
+
+		//TODO : Define here the attributes to be displayed as the label
+		this.label = ${recordInstance}.toString();
+	}
+
+	@Override
+	public String getValue() {
+		return value;
+	}
+
+	@Override
+	public String getLabel() {
+		return label;
+	}
+
+}

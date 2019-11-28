@@ -1,0 +1,5 @@
+## --- Global Variables (without reference to $entity )
+#set( $recordPackage      = "${ROOT_PKG}.data.record" )
+#set( $fakeImplPackage    = "${ROOT_PKG}.persistence.impl.fake" )
+## 
+#set( $fakeCommonsPackage = "${ROOT_PKG}.persistence.impl.fake.commons" )

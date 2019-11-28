@@ -1,0 +1,124 @@
+#checkId($entity)
+#parse("include/init_variables.vm")
+#parse("include/java_header.vm")
+package ${target.javaPackageFromFolder($SRC)};
+
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Named;
+
+#foreach( $import in $java.imports($entity.keyAttributes) )
+import $import;
+#end
+
+import ${recordPackage}.${recordClass};
+import ${ROOT_PKG}.persistence.${entity.name}Persistence;
+
+@Named("${entity.name}Persistence")
+public class ${entity.name}PersistenceImplFake implements ${entity.name}Persistence {
+
+	private final static Map<String,${recordClass}> map = new Hashtable<String,${recordClass}>() ;
+
+	private void checkNotNull(Object o) {
+		if ( o == null ) {
+			throw new IllegalArgumentException("Key element is null");
+		}
+	}
+
+#set ( $keyFields = $entity.keyAttributes )
+	/**
+	 * Build the String key from this entity
+#foreach( $field in $keyFields ) 
+     * @param ${field.name} 
+#end	 
+	 * @return the key
+	 */
+	private final String getKey( $fn.argumentsListWithWrapperType($keyFields) ) {
+#foreach( $field in $keyFields )
+		checkNotNull(${field.name});
+#end
+		return "" #foreach( $field in $keyFields ) + ${field.name} + "|" #end ;
+	}
+#set ( $paramName = ${fn.uncapitalize($entity.name)} )
+
+	@Override
+	public ${recordClass} findById($fn.argumentsListWithWrapperType($keyFields)) {
+		String key = getKey( $fn.argumentsList( $keyFields) );
+		return map.get(key);
+	}
+
+	@Override
+	public List<${recordClass}> findAll() {
+		List<${recordClass}> list = new LinkedList<${recordClass}>();
+		for ( ${recordClass} entity : map.values() ) {
+			list.add(entity);
+		}
+		return list;
+	}
+
+	@Override
+	public long countAll() {
+		return map.size() ;
+	}
+
+	@Override
+	public ${recordClass} save(${recordClass} entity) {
+		String key = getKey( $fn.argumentsListWithGetter( "entity", $keyFields) );
+		map.put(key, entity );
+		return entity;
+	}
+
+	@Override
+	public boolean update(${recordClass} entity) {
+		String key = getKey( $fn.argumentsListWithGetter( "entity", $keyFields) );
+		if ( map.get(key) == null ) {
+			// Doesn't Exist => no update
+			return false ;
+		}
+		else {
+			// Exists => update
+			map.put(key, entity );
+			return true ;
+		}
+	}
+
+	@Override
+	public ${recordClass} create(${recordClass} entity) {
+		String key = getKey( $fn.argumentsListWithGetter( "entity", $keyFields) );
+		if ( map.get(key) == null ) {
+			map.put(key, entity );
+			return entity ;
+		}
+		else {
+			throw new RuntimeException("${recordClass} - Duplicate key : " + key );
+		}
+	}
+
+	@Override
+	public boolean deleteById($fn.argumentsListWithWrapperType($keyFields)) {
+		String key = getKey($fn.argumentsList($keyFields));
+		${recordClass} deleted = map.remove(key);
+		return deleted != null ;
+	}
+
+	@Override
+	public boolean delete(${recordClass} entity) {
+		String key = getKey( $fn.argumentsListWithGetter( "entity", $keyFields) );
+		${recordClass} deleted = map.remove(key);
+		return deleted != null ;
+	}
+
+	@Override
+	public boolean exists($fn.argumentsListWithWrapperType($keyFields)) {
+		return findById($fn.argumentsList($keyFields)) != null ;
+	}
+
+	@Override
+	public boolean exists(${recordClass} entity) {
+		return findById( $fn.argumentsListWithGetter( "entity", $keyFields) ) != null ;
+	}
+
+}

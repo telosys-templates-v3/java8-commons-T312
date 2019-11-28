@@ -1,0 +1,34 @@
+#checkId($entity)
+#parse("/include/init_var_entity.vm")
+#parse("/include/java_header.vm")
+##--------------------------------------------------------------------------------------------------------
+## #set( $persistenceInterface = "${entity.name}Persistence" )
+##--------------------------------------------------------------------------------------------------------
+package ${target.javaPackageFromFolder($TEST_SRC)};
+
+import ${ROOT_PKG}.persistence.$persistenceServiceInterface ;
+import ${ROOT_PKG}.persistence.${entity.name}PersistenceGenericTest;
+import org.junit.Test;
+
+/**
+ * JUnit tests for ${entity.name} persistence service
+ * 
+ * @author Telosys Tools
+ *
+ */
+public class ${entity.name}PersistenceFakeTest extends ${entity.name}PersistenceGenericTest {
+
+	@Test
+	public void testPersistenceService() {
+    	System.out.println("test $persistenceServiceClass ");
+
+    	$persistenceServiceInterface persistenceService = new $persistenceServiceClass();
+
+#if ( $entity.hasAutoIncrementedKey() )
+    	testPersistenceServiceWithAutoincrementedKey(persistenceService);
+#else
+    	testPersistenceService(persistenceService);
+#end
+
+	}	
+}

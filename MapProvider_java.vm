@@ -1,0 +1,20 @@
+#parse("include/java_header.vm")
+
+package ${target.javaPackageFromFolder(${SRC})};
+
+import java.util.Hashtable;
+import java.util.Map;
+
+public class MapProvider {
+
+	private final static Map<Class<?>, Map<String,Object>> maps = new Hashtable<Class<?>, Map<String,Object>>() ;
+	
+	protected final static Map<String,Object> getMap(Class<?> clazz) {
+		Map<String,Object> map = maps.get(clazz) ;
+		if ( map == null ) {
+			map = new Hashtable<String,Object>();
+			maps.put(clazz,map);
+		}
+		return map ;
+	}
+}

@@ -1,0 +1,19 @@
+#parse("include/java_header.vm")
+
+package ${target.javaPackageFromFolder(${SRC})};
+
+/**
+ * The pattern defined here is used by the Persistence Service Provider <br>
+ * to build the service implementation class name <br>
+ * 
+ * @author Telosys
+ *
+ */
+public class PersistenceServicePattern {
+
+	// Set the persistence service class pattern below ...
+	public final static String  PATTERN = PersistenceFakeServicePattern.PATTERN ;
+	
+	// public final static String  PATTERN = PersistenceJdbcServicePattern.PATTERN ;
+	// public final static String  PATTERN = PersistenceJPAServicePattern.PATTERN ;
+}

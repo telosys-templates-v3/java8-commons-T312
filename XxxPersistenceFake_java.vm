@@ -1,0 +1,144 @@
+#checkId($entity)
+#parse("include/init_var_global.vm")
+#parse("include/init_var_entity.vm")
+#parse("include/java_header.vm")
+package ${target.javaPackageFromFolder($SRC)};
+
+import java.util.List;
+
+#foreach( $import in $java.imports($entity.keyAttributes) )
+import $import;
+#end
+
+import javax.inject.Named;
+
+import ${recordPackage}.${recordClass};
+import ${ROOT_PKG}.persistence.${persistenceServiceInterface};
+import ${fakeCommonsPackage}.GenericFakeDAO;
+
+/**
+ * ${entity.name} persistence service - FAKE implementation 
+ * 
+ * @author Telosys
+ *
+ */
+@Named("${persistenceServiceInterface}")
+public class $persistenceServiceClass extends GenericFakeDAO<${recordClass}> implements $persistenceServiceInterface {
+
+	/**
+	 * Constructor
+	 */
+	public $persistenceServiceClass() {
+		super(${recordClass}.class);
+	}
+
+	/**
+	 * Creates a new bean instance and set its primary key value(s)
+	 * 
+#foreach( $field in $keyFields )
+	 * @param ${field.name}
+#end
+	 * @return the new instance
+	 */
+	private ${recordClass} newInstanceWithPrimaryKey($fn.argumentsListWithType($keyFields)) {
+		${recordClass} record = new ${recordClass}();
+#foreach( $field in $keyFields )
+        record.${field.setter}(${field.name}); 
+#end
+		return record;
+	}
+
+	//-------------------------------------------------------------------------------------
+	// Generic DAO abstract methods implementations
+	//-------------------------------------------------------------------------------------
+	@Override
+	protected String getKey(${recordClass} record) {
+		return buildKeyString($fn.argumentsListWithGetter("record", $keyFields));
+	}
+	
+	@Override
+	protected void setAutoIncrementedKey(${recordClass} record, long value) {
+#if( $entity.hasAutoIncrementedKey() )
+#if( $entity.autoincrementedKeyAttribute.isIntegerType() )
+		record.${entity.autoincrementedKeyAttribute.setter}(toInt(value));
+#elseif ( $entity.autoincrementedKeyAttribute.isShortType() )
+		record.${entity.autoincrementedKeyAttribute.setter}(toShort(value));
+#else
+		//record.${entity.autoincrementedKeyAttribute.setter}((${entity.autoincrementedKeyAttribute.type})value);
+		record.${entity.autoincrementedKeyAttribute.setter}(value);
+#end
+#else
+		throw new IllegalStateException("Unexpected call to method 'setAutoIncrementedKey'");
+#end
+	}
+
+	//-------------------------------------------------------------------------------------
+	// Persistence interface implementations
+	//-------------------------------------------------------------------------------------
+	@Override
+	public long countAll() {
+		return super.doCountAll();
+	}
+	
+	@Override
+	public ${recordClass} create(${recordClass} record) {
+#if( $entity.hasAutoIncrementedKey() )
+		super.doCreateAutoIncremented(record);
+#else
+		super.doCreate(record);
+#end
+		return record;
+	}
+
+	@Override
+	public boolean delete(${recordClass} record) {
+		return super.doDelete(record);
+	}
+
+	@Override
+	public boolean deleteById($fn.argumentsListWithWrapperType($keyFields)) {
+		${recordClass} record = newInstanceWithPrimaryKey($fn.argumentsList($keyFields));
+		return super.doDelete(record);
+	}
+
+	@Override
+	public boolean exists(${recordClass} record) {
+		return super.doExists(record);
+	}
+
+	@Override
+	public boolean exists($fn.argumentsListWithWrapperType($keyFields)) {
+		${recordClass} record = newInstanceWithPrimaryKey($fn.argumentsList($keyFields));
+		return super.doExists(record);
+	}
+
+	@Override
+	public List<${recordClass}> findAll() {
+		return super.doFindAll();
+	}
+
+	@Override
+	public ${recordClass} findById($fn.argumentsListWithWrapperType($keyFields)) {
+        ${recordClass} record = newInstanceWithPrimaryKey($fn.argumentsList($keyFields));
+		return super.doFind(record);
+	}
+
+	@Override
+	public ${recordClass} save(${recordClass} record) {
+		if (super.doExists(record)) {
+			super.doUpdate(record);
+		} else {
+#if( $entity.hasAutoIncrementedKey() )
+			super.doCreateAutoIncremented(record);
+#else
+			super.doCreate(record);
+#end
+		}
+        return record;
+	}
+
+	@Override
+	public boolean update(${recordClass} record) {
+		return super.doUpdate(record);	
+	}
+}

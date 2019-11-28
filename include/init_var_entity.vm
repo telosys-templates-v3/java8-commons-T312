@@ -1,0 +1,7 @@
+#set( $recordPackage  = "${ROOT_PKG}.data.record" )
+#set( $recordClass    = "${entity.name}Record" )
+#set( $recordInstance = $fn.uncapitalize($entity.name) )
+##
+#set( $persistenceServiceInterface = "${entity.name}Persistence" )
+#set( $persistenceServiceClass     = "${entity.name}PersistenceFake" )
+#set( $keyFields = $entity.keyAttributes )
